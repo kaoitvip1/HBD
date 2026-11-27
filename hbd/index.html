@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สุขสันต์วันเกิด</title>
+<link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#121638; --paper:#fffdf9; --ink:#33245a; --text:#fff3df;
+    --straw:#f0486a; --butter:#ffd166; --rose:#ff9fb5;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none !important}
+  body{
+    min-height:100vh;overflow-x:hidden;color:var(--text);text-align:center;
+    font-family:"Mali",sans-serif;line-height:1.7;background:var(--night);
+  }
+  h1{font-family:"Chonburi","Mali",serif;font-weight:400}
+  button{font-family:"Mali",sans-serif;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  button:focus-visible{outline:3px dashed var(--butter);outline-offset:6px;border-radius:16px}
+  canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+
+  /* ท้องฟ้า ดาว พระจันทร์ ไฟประดับ */
+  #stars{position:fixed;inset:0;pointer-events:none;background:linear-gradient(#121638,#2a2862 55%,#6a4580)}
+  #stars i{position:absolute;border-radius:50%;background:#fff;animation:twinkle 2.8s ease-in-out infinite alternate}
+  @keyframes twinkle{from{opacity:.2}to{opacity:.95}}
+  #moon{position:absolute;top:82px;right:7%;width:52px;z-index:1;filter:drop-shadow(0 0 14px rgba(255,233,170,.75))}
+  #lights{position:absolute;top:0;left:0;right:0;height:70px;pointer-events:none;z-index:2}
+  #lights svg{display:block;overflow:visible}
+
+  section{position:relative;z-index:3}
+
+  /* หน้าแรก */
+  #intro{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:96px 16px 32px}
+  #intro h1{font-size:clamp(1.8rem,8vw,2.8rem);line-height:1.5}
+  #gift{background:none;border:0;width:min(250px,70vw);margin:20px 0}
+  #gift svg{display:block;width:100%;overflow:visible}
+  #gift .all{transform-origin:100px 185px;animation:wiggle 2.4s ease-in-out infinite}
+  #gift .lid{transition:transform .55s cubic-bezier(.3,1.6,.5,1),opacity .55s}
+  #gift.open .all{animation:none}
+  #gift.open .lid{transform:translate(28px,-85px) rotate(22deg);opacity:0}
+  @keyframes wiggle{0%,68%,100%{transform:rotate(0)}74%{transform:rotate(-6deg)}82%{transform:rotate(5deg)}90%{transform:rotate(-2deg)}}
+  .tap{font-size:1.1rem;font-weight:600}
+
+  /* หน้าฉลอง */
+  #party{max-width:560px;margin:0 auto;padding:142px 18px 56px}
+  #party h1{font-size:clamp(2.4rem,11vw,4rem);line-height:1.45;color:var(--butter);text-shadow:0 0 22px rgba(255,209,102,.5)}
+  #name{font-size:clamp(1.9rem,9vw,3rem);font-weight:700;color:var(--rose);line-height:1.4;overflow-wrap:anywhere}
+
+  #cake{display:block;width:min(360px,100%);margin:8px auto 0;background:none;border:0}
+  #cake svg{display:block;width:100%;overflow:visible}
+  .flame{transform-box:fill-box;transform-origin:50% 100%;animation:flicker .4s ease-in-out infinite alternate}
+  .glow{fill:url(#glow)}
+  @keyframes flicker{from{transform:scale(1) rotate(-3deg)}to{transform:scale(.9,1.12) rotate(3deg)}}
+  .smoke{opacity:0;fill:#e6e1f5}
+  .out .flame,.out .glow{display:none}
+  .out .smoke{animation:smoke 1.8s ease-out forwards}
+  @keyframes smoke{0%{opacity:.8;transform:translateY(0)}100%{opacity:0;transform:translateY(-38px)}}
+  #hint{min-height:2em;margin-top:10px;font-size:1.1rem;font-weight:600}
+
+  /* เพลง */
+  .song{margin-top:26px}
+  .song iframe{display:block;width:100%;aspect-ratio:16/9;min-height:200px;border:0;border-radius:14px;background:#000}
+  .song a{display:inline-block;margin-top:8px;color:var(--text);font-size:.95rem}
+
+  /* การ์ดอวยพร */
+  .letter{
+    position:relative;color:var(--ink);margin-top:44px;padding:40px clamp(14px,5vw,22px) 26px;transform:rotate(-1.2deg);
+    background:repeating-linear-gradient(transparent 0 35px,#f6d3dc 35px 36px) 0 40px,var(--paper);
+    font-size:clamp(1rem,4.4vw,1.15rem);line-height:36px;text-align:left;border-radius:4px;
+    box-shadow:0 18px 30px -14px rgba(5,7,30,.45);
+  }
+  .letter::before{content:"";position:absolute;top:-14px;left:50%;width:120px;height:30px;transform:translateX(-50%) rotate(2deg);background:repeating-linear-gradient(45deg,rgba(143,211,232,.85) 0 8px,rgba(190,230,242,.85) 8px 16px)}
+  #to{font-weight:700;overflow-wrap:anywhere}
+  #message{white-space:pre-line;overflow-wrap:anywhere}
+  #from{text-align:right;font-weight:600;color:#c23a5e}
+
+  /* รูปโพลารอยด์ */
+  #photos{display:flex;flex-wrap:wrap;justify-content:center;gap:22px;margin-top:40px}
+  #photos img{width:min(230px,80vw);aspect-ratio:4/5;object-fit:cover;background:#fff;padding:12px 12px 40px;box-shadow:0 14px 24px -12px rgba(5,7,30,.5);transform:rotate(-3deg)}
+  #photos img:nth-child(even){transform:rotate(3deg)}
+  #photos:empty{display:none}
+
+  .actions{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:40px}
+  .btn{border:2px solid var(--ink);color:var(--ink);border-radius:999px;padding:10px 24px;font-size:1rem;font-weight:600;background:#fff;box-shadow:0 5px 0 #0c0f2b}
+  .btn.main{background:var(--butter)}
+  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #0c0f2b}
+  .btn:focus-visible{border-radius:999px}
+
+  .balloon{position:fixed;bottom:-150px;width:58px;z-index:1;pointer-events:none;animation:rise linear infinite}
+  @keyframes rise{from{transform:translate(0,0) rotate(-4deg)}50%{transform:translate(18px,-65vh) rotate(4deg)}to{transform:translate(0,calc(-100vh - 320px)) rotate(-4deg)}}
+
+  @media (prefers-reduced-motion:reduce){
+    #gift .all,.flame,#stars i{animation:none}
+    .balloon{display:none}
+  }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div id="stars" aria-hidden="true"></div>
+<svg id="moon" viewBox="0 0 56 56" aria-hidden="true"><path d="M30 3A26 26 0 1 0 53 40A22 22 0 0 1 30 3Z" fill="#ffe9aa"/></svg>
+<div id="lights" aria-hidden="true"></div>
+
+<section id="intro">
+  <h1>มีของขวัญมาส่ง</h1>
+  <button id="gift" aria-label="เปิดของขวัญ">
+    <svg viewBox="0 0 200 200" aria-hidden="true">
+      <ellipse cx="100" cy="188" rx="80" ry="9" fill="#000" opacity=".25"/>
+      <g class="all">
+        <rect x="35" y="90" width="130" height="95" rx="10" fill="#f0486a"/>
+        <rect x="35" y="90" width="130" height="16" fill="#c92f55" opacity=".55"/>
+        <g fill="#ff8aa0">
+          <circle cx="55" cy="128" r="6"/><circle cx="68" cy="162" r="6"/><circle cx="142" cy="130" r="6"/><circle cx="130" cy="164" r="6"/>
+        </g>
+        <rect x="87" y="90" width="26" height="95" fill="#ffd166"/>
+        <g class="lid">
+          <rect x="25" y="66" width="150" height="32" rx="8" fill="#ff6482"/>
+          <rect x="87" y="66" width="26" height="32" fill="#ffd166"/>
+          <path d="M98 66C70 20 35 35 50 58C60 72 85 68 98 66ZM102 66C130 20 165 35 150 58C140 72 115 68 102 66Z" fill="#ffd166" stroke="#e9ad33" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M92 60C75 42 58 42 60 52C63 61 80 62 92 60ZM108 60C125 42 142 42 140 52C137 61 120 62 108 60Z" fill="#e9ad33"/>
+          <rect x="88" y="52" width="24" height="18" rx="8" fill="#ffd166" stroke="#e9ad33" stroke-width="3"/>
+        </g>
+      </g>
+    </svg>
+  </button>
+  <p class="tap">แตะกล่องเพื่อเปิด</p>
+</section>
+
+<section id="party" hidden>
+  <h1>สุขสันต์วันเกิด</h1>
+  <p id="name"></p>
+
+  <button id="cake" aria-label="เป่าเทียน">
+    <svg viewBox="0 55 320 248" aria-hidden="true">
+      <defs>
+        <radialGradient id="glow"><stop offset="0" stop-color="#ffd166" stop-opacity=".9"/><stop offset="1" stop-color="#ffd166" stop-opacity="0"/></radialGradient>
+      </defs>
+      <ellipse class="glow" cx="160" cy="125" rx="165" ry="105" opacity=".4"/>
+      <!-- ขาตั้งเค้ก -->
+      <path d="M134 264H186L198 292Q200 298 192 298H128Q120 298 122 292Z" fill="#c9a15c"/>
+      <ellipse cx="160" cy="249" rx="138" ry="28" fill="#c9a15c"/>
+      <ellipse cx="160" cy="243" rx="138" ry="28" fill="#f3dfb4"/>
+      <!-- ตัวเค้ก -->
+      <path d="M62 150V236Q160 272 258 236V150Z" fill="#8a5238"/>
+      <path d="M214 160V248Q240 243 258 236V150Z" fill="#6f3f2b"/>
+      <path d="M62 210Q160 244 258 210V218Q160 252 62 218Z" fill="#f6c9a0"/>
+      <path d="M62 150C62 180 76 186 80 170C84 160 94 166 98 182C102 204 118 200 118 180C120 170 134 172 140 186C146 196 160 194 160 178C164 170 176 174 180 192C184 216 200 210 200 190C202 178 214 176 220 188C228 198 236 190 236 178C240 164 258 184 258 150A98 26 0 0 0 62 150Z" fill="#43200f"/>
+      <ellipse cx="160" cy="150" rx="98" ry="26" fill="#55291a"/>
+      <g id="candles"></g>
+      <g transform="translate(80 158)">
+        <path d="M-14 4Q-15-6-6-7Q-5-15 2-13Q10-12 8-6Q16-4 14 4Q0 11-14 4Z" fill="#fff1d6"/>
+        <path d="M1-17Q3-30 12-33" fill="none" stroke="#5bb98c" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cy="-11" r="8.5" fill="#d81f45"/>
+        <circle cx="-3" cy="-14" r="2.4" fill="#fff" opacity=".7"/>
+      </g><g transform="translate(112 168)">
+        <path d="M-14 4Q-15-6-6-7Q-5-15 2-13Q10-12 8-6Q16-4 14 4Q0 11-14 4Z" fill="#fff1d6"/>
+        <path d="M1-17Q3-30 12-33" fill="none" stroke="#5bb98c" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cy="-11" r="8.5" fill="#d81f45"/>
+        <circle cx="-3" cy="-14" r="2.4" fill="#fff" opacity=".7"/>
+      </g><g transform="translate(160 172)">
+        <path d="M-14 4Q-15-6-6-7Q-5-15 2-13Q10-12 8-6Q16-4 14 4Q0 11-14 4Z" fill="#fff1d6"/>
+        <path d="M1-17Q3-30 12-33" fill="none" stroke="#5bb98c" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cy="-11" r="8.5" fill="#d81f45"/>
+        <circle cx="-3" cy="-14" r="2.4" fill="#fff" opacity=".7"/>
+      </g><g transform="translate(208 168)">
+        <path d="M-14 4Q-15-6-6-7Q-5-15 2-13Q10-12 8-6Q16-4 14 4Q0 11-14 4Z" fill="#fff1d6"/>
+        <path d="M1-17Q3-30 12-33" fill="none" stroke="#5bb98c" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cy="-11" r="8.5" fill="#d81f45"/>
+        <circle cx="-3" cy="-14" r="2.4" fill="#fff" opacity=".7"/>
+      </g><g transform="translate(240 158)">
+        <path d="M-14 4Q-15-6-6-7Q-5-15 2-13Q10-12 8-6Q16-4 14 4Q0 11-14 4Z" fill="#fff1d6"/>
+        <path d="M1-17Q3-30 12-33" fill="none" stroke="#5bb98c" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cy="-11" r="8.5" fill="#d81f45"/>
+        <circle cx="-3" cy="-14" r="2.4" fill="#fff" opacity=".7"/>
+      </g>
+      <circle cx="62" cy="236" r="10.5" fill="#fff1d6"/><circle cx="78" cy="241" r="10.5" fill="#fff1d6"/><circle cx="95" cy="246" r="10.5" fill="#fff1d6"/><circle cx="111" cy="250" r="10.5" fill="#fff1d6"/><circle cx="127" cy="252" r="10.5" fill="#fff1d6"/><circle cx="144" cy="254" r="10.5" fill="#fff1d6"/><circle cx="160" cy="254" r="10.5" fill="#fff1d6"/><circle cx="176" cy="254" r="10.5" fill="#fff1d6"/><circle cx="193" cy="252" r="10.5" fill="#fff1d6"/><circle cx="209" cy="250" r="10.5" fill="#fff1d6"/><circle cx="225" cy="246" r="10.5" fill="#fff1d6"/><circle cx="242" cy="242" r="10.5" fill="#fff1d6"/><circle cx="258" cy="236" r="10.5" fill="#fff1d6"/>
+    </svg>
+  </button>
+  <p id="hint" aria-live="polite">อธิษฐานแล้วแตะเค้กเพื่อเป่าเทียน</p>
+
+  <div class="song">
+    <iframe id="player" title="เพลง ถ้อยวลี โดย FLUKIE" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <a id="songlink" target="_blank" rel="noopener">ถ้าเพลงไม่เล่น แตะเพื่อฟังใน YouTube</a>
+  </div>
+
+  <div class="letter">
+    <p id="to"></p>
+    <p id="message"></p>
+    <p id="from"></p>
+  </div>
+
+  <div id="photos"></div>
+
+  <div class="actions">
+    <button class="btn main" id="again">จุดเทียนใหม่</button>
+  </div>
+</section>
+
+<script>
+// ===================== แก้ตรงนี้ =====================
+const CONFIG = {
+  name: "วา",
+  message: "แก่ขึ้นอีกปีแล้วนะ\nปีนี้ไม่ได้อยู่ฉลองด้วยกัน\nแต่ยังจำวันของเธอได้เสมอ\nขอให้มีความสุขมาก ๆ นะ\nแล้วก็เลิกนอนดึกได้สักที",
+  from: "จากคนเคยคุ้น",
+  candles: 5,
+  song: "LxTjosA976E",   // รหัสวิดีโอ YouTube (ถ้อยวลี - FLUKIE)
+  photos: []   // ตัวอย่าง: ["photo1.jpg", "photo2.jpg"]  (วางรูปไว้โฟลเดอร์เดียวกับไฟล์นี้)
+};
+// =====================================================
+
+const $ = id => document.getElementById(id);
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const COLORS = ["#f0486a","#ffd166","#8fd3e8","#5bb98c","#b48ae0"];
+
+$("name").textContent = CONFIG.name;
+$("to").textContent = "ถึง " + CONFIG.name;
+$("message").textContent = CONFIG.message;
+$("from").textContent = CONFIG.from;
+CONFIG.photos.forEach(src => {
+  const img = new Image();
+  img.alt = "รูปความทรงจำ";
+  img.onerror = () => img.remove();
+  img.src = src;
+  $("photos").appendChild(img);
+});
+
+// ---------- เทียน ----------
+const count = Math.max(1, Math.min(CONFIG.candles, 10));
+const gap = count > 1 ? Math.min(24, 118 / (count - 1)) : 0;
+$("candles").innerHTML = Array.from({length: count}, (_, i) => {
+  const x = 160 + (i - (count - 1) / 2) * gap;
+  const color = ["#ff9fb5","#ffd166","#9ad7ff"][i % 3];
+  return `<g transform="translate(${x} 150)">
+    <rect x="-4" y="-44" width="8" height="46" rx="3" fill="${color}"/>
+    <path d="M-4-34l8-6M-4-20l8-6M-4-6l8-6" stroke="#fff" stroke-width="3"/>
+    <path d="M0-44v-6" stroke="#fff3df" stroke-width="2"/>
+    <circle class="glow" cy="-60" r="20"/>
+    <path class="flame" style="animation-delay:-${i * .13}s" d="M0-76C9-64 9-50 0-50S-9-64 0-76Z" fill="#ff9f1c"/>
+    <circle class="smoke" cy="-56" r="5"/>
+  </g>`;
+}).join("");
+
+// ---------- ไฟประดับและดาว ----------
+function lights(){
+  const w = document.documentElement.clientWidth;
+  const parts = Math.max(1, Math.round(w / 200)), seg = w / parts;
+  let wire = "", bulbs = "";
+  for (let p = 0; p < parts; p++) {
+    wire += `M${p * seg} 4Q${(p + .5) * seg} 68 ${(p + 1) * seg} 4`;
+    [.1,.3,.5,.7,.9].forEach((t, i) => {
+      const x = (p + t) * seg, y = 4 + 128 * t * (1 - t) + 8;
+      const c = ["#ffd166","#ff9fb5","#9ad7ff"][(p * 5 + i) % 3];
+      bulbs += `<circle cx="${x}" cy="${y}" r="13" fill="${c}" opacity=".22"/><circle cx="${x}" cy="${y}" r="6" fill="${c}"/>`;
+    });
+  }
+  $("lights").innerHTML = `<svg width="${w}" height="70"><path d="${wire}" fill="none" stroke="#8d87b8" stroke-width="2"/>${bulbs}</svg>`;
+}
+$("stars").innerHTML = Array.from({length: 70}, () => {
+  const size = Math.random() * 2 + 1;
+  return `<i style="left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${size}px;height:${size}px;animation-delay:-${Math.random() * 5}s"></i>`;
+}).join("");
+
+// ---------- พลุกระดาษ ----------
+const canvas = $("confetti"), ctx = canvas.getContext("2d");
+let bits = [], running = false;
+function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; lights(); }
+addEventListener("resize", resize); resize();
+
+function burst(total = 150){
+  if (calm) return;
+  for (let i = 0; i < total; i++) bits.push({
+    x: canvas.width / 2, y: canvas.height * .45,
+    vx: (Math.random() - .5) * 15, vy: -Math.random() * 13 - 3,
+    s: Math.random() * 7 + 6, a: Math.random() * 6,
+    color: COLORS[i % COLORS.length]
+  });
+  if (!running) { running = true; requestAnimationFrame(draw); }
+}
+function draw(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  bits.forEach(b => {
+    b.vy = Math.min(b.vy + .25, 4); b.vx *= .99;
+    b.x += b.vx; b.y += b.vy; b.a += .15;
+    ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.a);
+    ctx.fillStyle = b.color; ctx.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2);
+    ctx.restore();
+  });
+  bits = bits.filter(b => b.y < canvas.height + 20);
+  if (bits.length) requestAnimationFrame(draw); else running = false;
+}
+
+// ---------- ลูกโป่ง ----------
+function balloons(){
+  [4, 82, 24, 66].forEach((left, i) => {
+    const color = COLORS[i];
+    const b = document.createElement("div");
+    b.className = "balloon";
+    b.style.cssText = `left:${left}%;animation-duration:${13 + i * 2.5}s;animation-delay:${i * 1.8}s`;
+    b.innerHTML = `<svg viewBox="0 0 60 130" width="100%" aria-hidden="true">
+      <path d="M30 74q-12 18 0 30t0 24" fill="none" stroke="#fff" stroke-opacity=".4"/>
+      <ellipse cx="30" cy="36" rx="28" ry="35" fill="${color}"/>
+      <path d="M30 70l-5 8h10Z" fill="${color}"/>
+      <ellipse cx="19" cy="22" rx="6" ry="11" fill="#fff" opacity=".55" transform="rotate(30 19 22)"/>
+    </svg>`;
+    document.body.appendChild(b);
+  });
+}
+
+// ---------- เพลง (เครื่องเล่น YouTube) ----------
+$("songlink").href = "https://www.youtube.com/watch?v=" + CONFIG.song;
+function playSong(){
+  $("player").src = `https://www.youtube.com/embed/${CONFIG.song}?autoplay=1&playsinline=1&rel=0&loop=1&playlist=${CONFIG.song}`;
+}
+
+// ---------- ปุ่มต่าง ๆ ----------
+const HINT = $("hint").textContent;
+$("gift").onclick = () => {
+  if ($("gift").classList.contains("open")) return;
+  $("gift").classList.add("open");
+  setTimeout(() => {
+    $("intro").hidden = true;
+    $("party").hidden = false;
+    scrollTo(0, 0);
+    burst(); balloons(); playSong();
+  }, calm ? 0 : 600);
+};
+$("cake").onclick = () => {
+  if ($("cake").classList.contains("out")) return;
+  $("cake").classList.add("out");
+  $("hint").textContent = "ขอให้คำอธิษฐานเป็นจริงนะ";
+  burst(220);
+};
+$("again").onclick = () => {
+  $("cake").classList.remove("out");
+  $("hint").textContent = HINT;
+};
+</script>
+</body>
+</html>
